@@ -21,6 +21,12 @@ def get_tasks():
     # returns everything from tasks in task_manager DB
 
 
+@app.route('/add_task')
+def add_task():
+    return render_template('addtask.html', categories=mongo.db.categories.find())
+    # we need to return the categories (categories is the collection name) from the db to the addtask.html
+
+
 if __name__ == '__main__':
     app.run(host=os.environ.get('IP'),
             port=(os.environ.get('PORT')),
