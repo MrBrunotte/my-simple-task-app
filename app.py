@@ -13,19 +13,20 @@ app.config['MONGO_URI'] = 'mongodb+srv://mrbrunotte:mrUSERbrunotte@foodictionary
 # add instance of pymongo
 mongo = PyMongo(app)
 
-
+# base.html
 @app.route('/')
 @app.route('/get_tasks')
 def get_tasks():
-    return render_template("tasks.html", tasks=mongo.db.tasks.find())
     # returns everything from tasks in task_manager DB
+    return render_template("tasks.html", tasks=mongo.db.tasks.find())
 
-
+# base.html
 @app.route('/add_task')
 def add_task():
-    return render_template('addtask.html', categories=mongo.db.categories.find())
     # we need to return the categories (categories is the collection name) from the db to the addtask.html
+    return render_template('addtask.html', categories=mongo.db.categories.find())
 
+# addtask.html
 # since we are submitting a post we need the HTTP method POST!
 @app.route('/insert_task', methods=['POST'])
 def insert_task():
@@ -35,9 +36,11 @@ def insert_task():
     # Any of the form fields that have data inside them (or are active), will be submitted as part of the submission,
     # will go on to create a new document in the tasks collection in the task_manager DB
     # VIKTIGT: We need some validation fields here and in the HTML file for required fields
+    # redirects to home (@app.route('/get_tasks'))
     return redirect(url_for('get_tasks'))
 
 
+# tasks.html
 # wire up the edit button, we use the ObjectId from the bson.objectid library
 @app.route('/edit_task/<task_id>')
 def edit_task(task_id):
@@ -48,6 +51,8 @@ def edit_task(task_id):
     return render_template('edittask.html', task=the_task,
                            categories=all_categories)
 
+
+# edittask.html
 # Update Task In The Database
 @app.route('/update_task/<task_id>', methods=["POST"])
 def update_task(task_id):   # we pass in the task ID because thats our hook into the primary key
@@ -62,6 +67,8 @@ def update_task(task_id):   # we pass in the task ID because thats our hook into
     })
     return redirect(url_for('get_tasks'))
 
+
+# tasks.html
 # Delete Task
 @app.route('/delete_task/<task_id>')
 def delete_task(task_id):
@@ -70,18 +77,23 @@ def delete_task(task_id):
     # redirect to get_tasks to see that it is removed!
     return redirect(url_for('get_tasks'))
 
+
+# base.html
 # Display Categories
 @app.route('/get_categories')
 def get_categories():
     return render_template('categories.html', categories=mongo.db.categories.find())
 
 
+# category.html
 # we pass in the category ID into the function "edit_category()"
 @app.route('/edit_category/<category_id>')
 def edit_category(category_id):
     return render_template('editcategory.html',
                            category=mongo.db.categories.find_one({'_id': ObjectId(category_id)}))
 
+
+# edittask.html
 # Update Category In The Database
 # <category_id> targets the correct document in the DB
 @app.route('/update_category/<category_id>', methods=['POST'])
@@ -94,8 +106,10 @@ def update_category(category_id):
     return redirect(url_for('get_categories'))
 
 
+# addcategory.html
 # Add Category pt2. This function inserts the category the function below that lets us add a new category
 # no ID since it doesnt exist yet!!
+# 10:2
 @app.route('/insert_category', methods=['POST'])
 def insert_category():
     category_doc = {'category_name': request.form.get('category_name')}
@@ -103,10 +117,14 @@ def insert_category():
     mongo.db.categories.insert_one(category_doc)
     return redirect(url_for('get_categories'))
 
+
+# categories.html
 # Add Category pt1 this lets us add a new category
-@app.route('/add_category')     
+# 10:1
+@app.route('/add_category')
 def add_category():
-    return render_template('addcategory.html') # directs us to the addcategory page with the add_category function
+    # directs us to the addcategory page with the add_category function
+    return render_template('addcategory.html')
 
 
 if __name__ == '__main__':
